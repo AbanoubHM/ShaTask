@@ -1,0 +1,121 @@
+﻿@model ShaTask.DbModels.InvoiceHeader
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>InvoiceHeader</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group">
+                <label asp-for="CustomerName" class="control-label"></label>
+                <input asp-for="CustomerName" class="form-control" />
+                <span asp-validation-for="CustomerName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Invoicedate" class="control-label"></label>
+                <input asp-for="Invoicedate" class="form-control" />
+                <span asp-validation-for="Invoicedate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CashierId" class="control-label"></label>
+                <select asp-for="CashierId" class="form-control" asp-items="ViewBag.CashierId"></select>
+                <span asp-validation-for="CashierId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="BranchId" class="control-label"></label>
+                <select asp-for="BranchId" class="form-control" asp-items="ViewBag.BranchId"></select>
+                <span asp-validation-for="BranchId" class="text-danger"></span>
+            </div>
+            <div>
+                <div>
+                    <h4>Invoice Items</h4>
+                    <table class="table" id="invoiceItemsTable">
+                        <thead>
+                            <tr>
+                                <th>Item Name</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th></th> <!-- Column for remove button -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 0; i < Model.InvoiceDetails.Count; i++) {
+                                <tr>
+                                    <td>
+                                        <input type="hidden" asp-for="@Model.InvoiceDetails[i].Id" />
+
+                                        <input type="text" asp-for="@Model.InvoiceDetails[i].ItemName" class="form-control" />
+                                    </td>
+                                    <td>
+                                        <input type="number" asp-for="@Model.InvoiceDetails[i].ItemCount" class="form-control" />
+                                    </td>
+                                    <td>
+                                        <input type="text" asp-for="@Model.InvoiceDetails[i].ItemPrice" class="form-control" />
+                                        <input type="hidden" asp-for="@Model.InvoiceDetails[i].InvoiceHeaderId" />
+
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-danger remove-item">Remove</button>
+                                    </td>
+                                </tr>
+                            }
+                            <tr id="itemTemplate" style="display:none">
+                                <td>
+                                    <input type="text" name="ItemName" class="form-control" />
+                                </td>
+                                <td>
+                                    <input type="number" name="ItemCount" class="form-control" />
+                                </td>
+                                <td>
+                                    <input type="text" name="ItemPrice" class="form-control" />
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-danger remove-item">Remove</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <button type="button" id="addItem" class="btn btn-primary">Add Item</button>
+                </div>
+            
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function () {
+            $("#addItem").click(function () {
+                var index = $("#invoiceItemsTable tbody tr").length - 1; // Excluding template
+                var newRow = $("#itemTemplate").clone().removeAttr("id").show();
+                // Update names for model binding
+                newRow.find("input").each(function () {
+                    var name = $(this).attr("name");
+                    $(this).attr("name", `InvoiceDetails[${index}].${name}`);
+                });
+                $("#invoiceItemsTable tbody").append(newRow);
+            });
+
+            $("#invoiceItemsTable").on("click", ".remove-item", function () {
+                $(this).closest("tr").remove();
+                // Optional: re-index names
+            });
+        });
+    </script>
+}
